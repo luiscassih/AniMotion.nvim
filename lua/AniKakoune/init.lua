@@ -18,6 +18,16 @@ M.setup = function(config)
 
   for _, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
+      if k == "w" then
+        vim.cmd("normal! viw")
+        kakActive = true
+        return
+      end
+      if k == "b" then
+        vim.cmd("normal! viwo")
+        kakActive = true
+        return
+      end
       vim.cmd("normal! v" .. k)
       kakActive = true
     end)
@@ -26,6 +36,16 @@ M.setup = function(config)
         vim.cmd("normal! v")
         -- as we exited visual mode, we need to retrigger kak mode
         kakActive = true
+        if k == "w" then
+          vim.cmd("normal! wviw")
+          kakActive = true
+          return
+        end
+        if k == "b" then
+          vim.cmd("normal! bviwo")
+          kakActive = true
+          return
+        end
         vim.cmd("normal! v" .. k)
       else
         vim.api.nvim_feedkeys(k, "n", true)
