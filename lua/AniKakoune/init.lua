@@ -45,13 +45,20 @@ M.setup = function(config)
         vim.cmd("normal! v")
         -- as we exited visual mode, we need to retrigger kak mode
         kakActive = true
+        local original_pos = vim.fn.col('.')
         if k == "w" then
           vim.cmd("normal! " .. count .. "wviw")
+          if vim.fn.col('.') == original_pos+1 and vim.fn.matchstr(vim.fn.getline('.'), '\\%' .. vim.fn.col('.') .. 'c[A-Za-z]') == '' then
+            vim.cmd("normal! vwviw")
+          end
           kakActive = true
           return
         end
         if k == "b" then
           vim.cmd("normal! " .. count .. "bviwo")
+          if vim.fn.col('.') == original_pos-1 and vim.fn.matchstr(vim.fn.getline('.'), '\\%' .. vim.fn.col('.') .. 'c[A-Za-z]') == '' then
+            vim.cmd("normal! vbviwo")
+          end
           kakActive = true
           return
         end
@@ -69,16 +76,16 @@ M.setup = function(config)
   -- Exit Kak mode and trigger default behavior
   for _, k in ipairs(disableKak) do
     vim.keymap.set('v', k, function()
-      if (kakActive) then
+      if kakActive then
         kakActive = false
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true) .. k, "n", true)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true) .. vim.v.count1 .. k, "n", true)
       else
         vim.cmd("normal! " .. vim.v.count1 .. k)
       end
     end, { nowait = true, expr = false })
   end
   vim.keymap.set('v', 'v', function()
-    if (kakActive) then
+    if kakActive then
       kakActive = false
     else
       vim.cmd("normal! v")
