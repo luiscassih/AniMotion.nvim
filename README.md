@@ -1,5 +1,5 @@
 # AniKakoune
-A pretty simple way to do a select-first word per word navigation in neovim similar to kakoune.
+A pretty simple way to do a select-first word by word navigation in neovim similar to kakoune.
 
 ## Installation
 > Lazy
@@ -44,7 +44,7 @@ With word_keys you activate Kak mode, which just select the word first. If you c
 
 With disable_keys you deactivate the mode, which just means you can use the default behavior.
 
-While I call this Kakoune mode, it's a little bit different, it's more a "word per word" selection first. In Kakoune, when you git w, you select up to the beginning of the next word without including it, so you also select the space if there is one. In this plugin, is like you go word per word doing "viw" and selecting only the word.
+While I call this Kakoune mode, it's a little bit different, it's more a "word by word" selection first. In Kakoune, when you git w, you select up to the beginning of the next word without including it, so you also select the space if there is one. In this plugin, is like you go word by word doing "viw" and selecting only the word.
 
 In the example `vim.cmd("normal! v")` if you are in the first `i` from `vim`, pressing w will select `vim`, pressing again will select `.`, again `cmd` and go on. If you are in the end of the line, pressing `w` will select the last word without jumping to the next line until you hit `w` again.
 

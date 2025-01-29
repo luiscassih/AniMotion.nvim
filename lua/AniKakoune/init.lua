@@ -19,12 +19,20 @@ M.setup = function(config)
   for _, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
       if k == "w" then
-        vim.cmd("normal! viw")
+        if vim.v.count > 1 then
+          vim.cmd("normal! " .. vim.v.count-1 .. "wviw")
+        else
+          vim.cmd("normal! viw")
+        end
         kakActive = true
         return
       end
       if k == "b" then
-        vim.cmd("normal! viwo")
+        if vim.v.count > 1 then
+          vim.cmd("normal! " .. vim.v.count .. "bviwo")
+        else
+          vim.cmd("normal! viwo")
+        end
         kakActive = true
         return
       end
@@ -33,22 +41,23 @@ M.setup = function(config)
     end)
     vim.keymap.set({ 'v' }, k, function()
       if (kakActive) then
+        local count = vim.v.count1
         vim.cmd("normal! v")
         -- as we exited visual mode, we need to retrigger kak mode
         kakActive = true
         if k == "w" then
-          vim.cmd("normal! wviw")
+          vim.cmd("normal! " .. count .. "wviw")
           kakActive = true
           return
         end
         if k == "b" then
-          vim.cmd("normal! bviwo")
+          vim.cmd("normal! " .. count .. "bviwo")
           kakActive = true
           return
         end
         vim.cmd("normal! v" .. k)
       else
-        vim.api.nvim_feedkeys(k, "n", true)
+        vim.api.nvim_feedkeys(vim.v.count1 .. k, "n", true)
       end
     end)
   end
@@ -62,7 +71,7 @@ M.setup = function(config)
         -- vim.cmd("normal! v")
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
       end
-      vim.api.nvim_feedkeys(k, "n", true)
+      vim.api.nvim_feedkeys(vim.v.count1 .. k, "n", true)
     end)
   end
   vim.keymap.set('v', 'v', function()
