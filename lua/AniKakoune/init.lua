@@ -1,102 +1,75 @@
 local M = {}
+local ns_id = vim.api.nvim_create_namespace('AniKakoune')
+local current_mark = nil
 local kakActive = false
+local start_pos = nil
+local end_pos = nil
 
 M.isKakouneMode = function()
   return kakActive
 end
 
+local function clear_highlight()
+  if current_mark then
+    vim.api.nvim_buf_del_extmark(0, ns_id, current_mark)
+    current_mark = nil
+  end
+end
+
+local function highlight_selection()
+  clear_highlight()
+  if start_pos and end_pos then
+    -- print(vim.inspect(start_pos), vim.inspect(end_pos))
+    current_mark = vim.api.nvim_buf_set_extmark(0, ns_id, start_pos[1] -1, start_pos[2] -1, {
+      end_row = end_pos[1] -1,
+      end_col = end_pos[2],
+      hl_group = 'Visual'
+    })
+  end
+end
+
 M.setup = function(config)
   local opts = config or {}
+  local mode = opts.mode or "kakoune"
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
-  local disableKak = opts.disable_keys or {
-    -- "i", "a", "I", "A",
-    "o", "O",
-    "s", "[", "]", "{", "}", "\"", "'",
-    "h", "j", "k", "l", "f", "F", "t", "T", "/", "?", "n", "N",
-    "gg", "G", "$", "_", "0",
-    "H", "L", "J", "K",
-    "<C-d>", "<C-u>",
+  local edit = opts.edit_keys or {
+    "c", "d", "s", "r"
   }
 
   for _, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
-      if k == "w" then
-        if vim.v.count > 1 then
-          vim.cmd("normal! " .. vim.v.count-1 .. "wviw")
+      -- Store starting position before movement
+      start_pos = { vim.fn.line('.'), vim.fn.col('.') }
+      vim.cmd("normal! " .. (vim.v.count > 0 and (vim.v.count .. k) or k))
+      -- if k == "w" or k == "W" then
+      --   vim.cmd("normal! h")
+      -- end
+      vim.schedule(function()
+        if k == "b" or k == "B" then
+          end_pos = { vim.fn.line('.'), vim.fn.col('.') }
+          start_pos, end_pos = end_pos, start_pos
         else
-          vim.cmd("normal! viw")
+          end_pos = { vim.fn.line('.'), vim.fn.col('.') }
         end
         kakActive = true
-        return
-      end
-      if k == "b" then
-        if vim.v.count > 1 then
-          vim.cmd("normal! " .. vim.v.count .. "bviwo")
-        else
-          vim.cmd("normal! viwo")
-        end
-        kakActive = true
-        return
-      end
-      vim.cmd("normal! v" .. k)
-      kakActive = true
-    end)
-    vim.keymap.set({ 'v' }, k, function()
-      if (kakActive) then
-        local count = vim.v.count1
-        vim.cmd("normal! v")
-        -- as we exited visual mode, we need to retrigger kak mode
-        kakActive = true
-        local original_pos = vim.fn.col('.')
-        if k == "w" then
-          vim.cmd("normal! " .. count .. "wviw")
-          if vim.fn.col('.') == original_pos+1 and vim.fn.matchstr(vim.fn.getline('.'), '\\%' .. vim.fn.col('.') .. 'c[A-Za-z]') == '' then
-            vim.cmd("normal! vwviw")
-          end
-          kakActive = true
-          return
-        end
-        if k == "b" then
-          vim.cmd("normal! " .. count .. "bviwo")
-          if vim.fn.col('.') == original_pos-1 and vim.fn.matchstr(vim.fn.getline('.'), '\\%' .. vim.fn.col('.') .. 'c[A-Za-z]') == '' then
-            vim.cmd("normal! vbviwo")
-          end
-          kakActive = true
-          return
-        end
-        vim.cmd("normal! v" .. k)
-      else
-        if vim.v.count > 1 then
-          vim.api.nvim_feedkeys(vim.v.count .. k, "n", true)
-        else
-          vim.api.nvim_feedkeys(k, "n", true)
-        end
-      end
+        highlight_selection()
+      end)
     end)
   end
 
-  -- Exit Kak mode and trigger default behavior
-  for _, k in ipairs(disableKak) do
-    vim.keymap.set('v', k, function()
-      if kakActive then
+  for _, k in ipairs(edit) do
+    vim.keymap.set({ 'n' }, k, function()
+      if kakActive and start_pos and end_pos then
+        vim.api.nvim_win_set_cursor(0, {start_pos[1], start_pos[2]-1})
+        vim.cmd("normal! v")
+        vim.api.nvim_win_set_cursor(0, {end_pos[1], end_pos[2] -1})
+        vim.api.nvim_feedkeys(k, "n", true)
         kakActive = false
-        -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>" .. (vim.v.count > 0 and vim.v.count .. k or k), true, false, true), "n", false)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
       else
-        print("motion", k, vim.v.count1)
-        -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count > 0 and vim.v.count .. k or k, true, false, true), "n", false)
-        -- vim.cmd("normal! " .. vim.v.count1 .. k)
+        vim.api.nvim_feedkeys(k, "n", true)
       end
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count > 0 and vim.v.count .. k or k, true, false, true), "n", false)
-    end, { nowait = true, noremap = false })
+    end, { noremap = false })
   end
-  vim.keymap.set('v', 'v', function()
-    if kakActive then
-      kakActive = false
-    else
-      vim.cmd("normal! v")
-    end
-  end, { nowait = true })
 
   vim.api.nvim_create_autocmd('ModeChanged', {
     pattern = '*',
@@ -104,7 +77,18 @@ M.setup = function(config)
       local from_mode = event.match:sub(1,1)
       -- local to_mode = event.match:sub(-1)
 
-      if from_mode == 'v' or from_mode == 'V' or from_mode == '\22' then
+      if from_mode == 'n' then
+        kakActive = false
+        clear_highlight()
+      end
+    end
+  })
+
+  vim.api.nvim_create_autocmd('CursorMoved', {
+    pattern = '*',
+    callback = function(event)
+      if event.buf == vim.api.nvim_get_current_buf() then
+        clear_highlight()
         kakActive = false
       end
     end
