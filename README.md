@@ -1,6 +1,10 @@
 # AniKakoune
 A pretty simple way to do a select-first word by word navigation in neovim similar to kakoune.
 
+## Bugs
+[] - operation motions in visual mode doesn't work. For example, doing viw in normal mode select from cursor to next word instead of the current word at cursor.
+[] - Other keys do not work well in visual mode, for example G does not go to the last line, and goes to the first line instead.
+
 ## Installation
 > Lazy basic
 ```lua
@@ -38,7 +42,6 @@ ins_left {
   color = { fg = colors.red, gui = 'bold' },
 }
 ```
-
 ## Explanation
 With word_keys you activate Kak mode, which just select the word first. If you continue pressing, it will deselect and select with the next word movement.
 
@@ -48,4 +51,7 @@ While I call this Kakoune mode, it's a little bit different, it's more a "word b
 
 In the example `vim.keymap.set(` if you are in the first `i` from `vim`, pressing w will select `vim`, pressing again will select `keymap`, again `set` and go on. If you are in the end of the line, pressing `w` will select the last word without jumping to the next line until you hit `w` again.
 
- If you want to select more than the word itself, you can use `W` or `B` like the default vim motion behavior. If you are in the middle and don't want to select the whole word, you can press `v` to enter visual and then `e` to the end or `b` to the beginning. This way you retain the motion muscle memory from vim but add a select-first approach only when it's the whole word.
+If you want to select more than the word itself, you can use `W` or `B` like the default vim motion behavior. If you are in the middle and don't want to select the whole word, you can press `v` to enter visual and then `e` to the end or `b` to the beginning. This way you retain the motion muscle memory from vim but add a select-first approach only when it's the whole word.
+
+## Things to have in mind
+- "i", "I", "a", "A" motions will not work while in Kak mode because they are complex and wait for more operation keys while in visual mode. So if you want to insert or append after selecting a word, you need to exit Kak mode first (for example, by pressing C-c or Esc)

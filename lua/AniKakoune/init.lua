@@ -9,7 +9,9 @@ M.setup = function(config)
   local opts = config or {}
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
   local disableKak = opts.disable_keys or {
-    "i", "a", "I", "A", "o", "O",
+    -- "i", "a", "I", "A",
+    "o", "O",
+    "s", "[", "]", "{", "}", "\"", "'",
     "h", "j", "k", "l", "f", "F", "t", "T", "/", "?", "n", "N",
     "gg", "G", "$", "_", "0",
     "H", "L", "J", "K",
@@ -78,11 +80,15 @@ M.setup = function(config)
     vim.keymap.set('v', k, function()
       if kakActive then
         kakActive = false
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true) .. vim.v.count1 .. k, "n", true)
+        -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>" .. (vim.v.count > 0 and vim.v.count .. k or k), true, false, true), "n", false)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
       else
-        vim.cmd("normal! " .. vim.v.count1 .. k)
+        print("motion", k, vim.v.count1)
+        -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count > 0 and vim.v.count .. k or k, true, false, true), "n", false)
+        -- vim.cmd("normal! " .. vim.v.count1 .. k)
       end
-    end, { nowait = true, expr = false })
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count > 0 and vim.v.count .. k or k, true, false, true), "n", false)
+    end, { nowait = true, noremap = false })
   end
   vim.keymap.set('v', 'v', function()
     if kakActive then
