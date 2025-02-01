@@ -18,13 +18,8 @@ return {
 ```lua
 require("AniKakoune").setup({
   word_keys = { "w", "b", "e", "W", "B", "E" },
-  disable_keys = {
-    "i", "a", "I", "A", "o", "O",
-    "h", "j", "k", "l", "f", "F", "t", "T", "/", "?", "n", "N",
-    "gg", "G", "$", "_", "0",
-    "H", "L", "J", "K",
-    "<C-d>", "<C-u>",
-  },
+  edit_keys = { "c", "d", "s", "r" },
+  marks = {"y", "z"}, -- used for visual select when changing or deleting the word
 })
 ```
 

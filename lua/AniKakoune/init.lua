@@ -48,9 +48,8 @@ M.setup = function(config)
   local opts = config or {}
   local mode = opts.mode or "kakoune"
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
-  local edit = opts.edit_keys or {
-    "c", "d", "s", "r"
-  }
+  local edit = opts.edit_keys or { "c", "d", "s", "r" }
+  local marks = opts.marks or {"y", "z"}
 
   for _, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
@@ -67,14 +66,9 @@ M.setup = function(config)
   for _, k in ipairs(edit) do
     vim.keymap.set({ 'n' }, k, function()
       if kakActive and start_pos and end_pos then
-        -- print(vim.inspect(start_pos), vim.inspect(end_pos))
-        vim.api.nvim_buf_set_mark(0,'<', start_pos[1], start_pos[2]-1, {})
-        vim.api.nvim_buf_set_mark(0,'>', start_pos[1], end_pos[2]-1, {})
-        vim.cmd("normal! `<v`>")
-        if start_pos[2] < end_pos[2] then
-          -- vim.cmd("normal! o")
-          vim.api.nvim_feedkeys("o", "n", true)
-        end
+        vim.api.nvim_buf_set_mark(0,marks[1], start_pos[1], start_pos[2]-1, {})
+        vim.api.nvim_buf_set_mark(0,marks[2], end_pos[1], end_pos[2]-1, {})
+        vim.cmd("normal! `" .. marks[1] .. "v`" .. marks[2])
         vim.api.nvim_feedkeys(k, "n", true)
         kakActive = false
       else
