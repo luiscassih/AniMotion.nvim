@@ -1,4 +1,4 @@
-# AniKakoune
+# AniSelectFirst.nvim
 A pretty simple way to do a select-first word by word navigation in neovim similar to kakoune.
 
 ## Bugs
