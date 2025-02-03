@@ -60,15 +60,19 @@ local get_prev_char = function(currentPos, line_content)
 end
 
 M.word_move = function(target, count)
-  local line = vim.fn.line('.')
-  local line_content = vim.fn.getline(line)
-  local current_pos = {vim.fn.line('.'), vim.fn.col('.')}
-  local hl_start = {current_pos[1], current_pos[2]}
-  local hl_end = {current_pos[1], current_pos[2]}
   -- print(get_character_type_by_key(get_character_type(get_next_char(current_pos, line_content))))
 
   if target == M.Targets.NextWordStart then
+    local line = vim.fn.line('.')
+    local line_content = vim.fn.getline(line)
+    local current_pos = {line, vim.fn.col('.')}
+    local hl_start = {current_pos[1], current_pos[2]}
+    local hl_end = {current_pos[1], current_pos[2]}
     for i = 1, count do
+      line = current_pos[1]
+      line_content = vim.fn.getline(line)
+      hl_start = {current_pos[1], current_pos[2]}
+      hl_end = {current_pos[1], current_pos[2]}
       -- while true
       local moved_from_original = false
       while true do
@@ -79,7 +83,7 @@ M.word_move = function(target, count)
         local next_char = get_next_char(current_pos, line_content)
         local next_type = get_character_type(next_char)
         local moved_new_line = false
-        print("evaluating:", current_char, current_type, next_char, next_type)
+        -- print("evaluating:", current_char, current_type, next_char, next_type)
         if hl_start[2] ~= current_pos[2] then
           if current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace then
             hl_end = {current_pos[1], current_pos[2]}
@@ -148,8 +152,8 @@ M.word_move = function(target, count)
         end
       end
       -- print("word_start", vim.inspect(word_start), "word_end", vim.inspect(word_end))
-    end
+    end -- for
+    return { hl_start, hl_end }
   end
-  return { hl_start, hl_end }
 end
 return M

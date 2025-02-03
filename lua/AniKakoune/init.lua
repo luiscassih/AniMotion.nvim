@@ -233,7 +233,7 @@ M.setup = function(config)
         local hl = Kakoune.word_move(Kakoune.Targets.NextWordStart, vim.v.count1)
         start_pos = hl[1]
         end_pos = hl[2]
-        print("start", vim.inspect(start_pos), "end", vim.inspect(end_pos))
+        -- print("start", vim.inspect(start_pos), "end", vim.inspect(end_pos))
         vim.fn.cursor(end_pos[1], end_pos[2])
         vim.schedule(function()
           highlight_selection()
