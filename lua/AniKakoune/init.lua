@@ -236,6 +236,7 @@ M.setup = function(config)
         -- print("start", vim.inspect(start_pos), "end", vim.inspect(end_pos))
         vim.fn.cursor(end_pos[1], end_pos[2])
         vim.schedule(function()
+          kakActive = true
           highlight_selection()
         end)
       end

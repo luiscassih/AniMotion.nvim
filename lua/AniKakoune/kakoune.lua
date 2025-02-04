@@ -68,7 +68,7 @@ M.word_move = function(target, count)
     local current_pos = {line, vim.fn.col('.')}
     local hl_start = {current_pos[1], current_pos[2]}
     local hl_end = {current_pos[1], current_pos[2]}
-    for i = 1, count do
+    for _ = 1, count do
       line = current_pos[1]
       line_content = vim.fn.getline(line)
       hl_start = {current_pos[1], current_pos[2]}
@@ -82,76 +82,53 @@ M.word_move = function(target, count)
 
         local next_char = get_next_char(current_pos, line_content)
         local next_type = get_character_type(next_char)
-        local moved_new_line = false
         -- print("evaluating:", current_char, current_type, next_char, next_type)
         if hl_start[2] ~= current_pos[2] then
-          if current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace then
-            hl_end = {current_pos[1], current_pos[2]}
-            break
-          end
-          if current_type == CharacterType.Punctuation and next_type == CharacterType.Word then
-            hl_end = {current_pos[1], current_pos[2]}
-            break
-          end
-          if current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation then
-            hl_end = {current_pos[1], current_pos[2]}
-            break
-          end
-          if next_type == CharacterType.EndOfLine then
-            hl_end = {current_pos[1], current_pos[2]}
+          if (current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace)
+            or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
+            or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+            or (next_type == CharacterType.EndOfLine)
+          then
             break
           end
         else -- start == current
           if moved_from_original == true then
-            if current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation then
-              hl_end = {current_pos[1], current_pos[2]}
-              break
-            end
-            if current_type == CharacterType.Punctuation and next_type == CharacterType.Word then
-              hl_end = {current_pos[1], current_pos[2]}
-              break
-            end
-            if next_type == CharacterType.EndOfLine then
-              hl_end = {current_pos[1], current_pos[2]}
+            if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+              or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
+              or (next_type == CharacterType.EndOfLine)
+            then
               break
             end
           else
-            if get_character_type(current_char) == CharacterType.EndOfLine or get_character_type(next_char) == CharacterType.EndOfLine then
+            if get_character_type(current_char) == CharacterType.EndOfLine
+              or get_character_type(next_char) == CharacterType.EndOfLine
+            then
               current_pos[1] = current_pos[1] + 1
               current_pos[2] = 1
               hl_start = {current_pos[1], current_pos[2]}
               hl_end = {current_pos[1], current_pos[2]}
               line = current_pos[1]
               line_content = vim.fn.getline(line)
-              moved_new_line = true
-            else
-              if current_type == CharacterType.Punctuation and next_type ~= CharacterType.WhiteSpace then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
-              if current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
-              if current_type == CharacterType.WhiteSpace and next_type == CharacterType.Word then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
+              goto continue
+            end
+            if (current_type == CharacterType.Punctuation and next_type ~= CharacterType.WhiteSpace)
+              or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+              or (current_type == CharacterType.WhiteSpace and next_type == CharacterType.Word)
+            then
+              hl_start[2] = hl_start[2] + 1
+              moved_from_original = true
             end
           end
-          -- if next_type ~= CharacterType.Word and next_type ~= CharacterType.WhiteSpace and next_type ~= CharacterType.EndOfLine then
-          --   word_start[2] = word_start[2] + 1
-          -- end
         end -- end else start == curent
 
-        if not moved_new_line then
-          current_pos[2] = current_pos[2] + 1
-          if current_pos[2] > #line_content then
-            break
-          end
+        current_pos[2] = current_pos[2] + 1
+        if current_pos[2] > #line_content then
+          break
         end
+      ::continue::
       end
       -- print("word_start", vim.inspect(word_start), "word_end", vim.inspect(word_end))
+    hl_end = {current_pos[1], current_pos[2]}
     end -- for
     return { hl_start, hl_end }
   end
