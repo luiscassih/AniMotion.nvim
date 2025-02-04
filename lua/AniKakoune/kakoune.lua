@@ -89,6 +89,15 @@ M.word_move = function(target, count)
             break
           end
         end
+
+        if target == M.Targets.NextWordEnd then
+          if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
+            or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+            or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
+          then
+            break
+          end
+        end
       else
         -- start == current, we start highlighting the word
         if moved_from_original == true then
@@ -106,6 +115,14 @@ M.word_move = function(target, count)
           end
 
           -- NextLongWordStart doesn't need because punctuation and word are equal
+
+          if target == M.Targets.NextWordEnd then
+            if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
+              or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
+            then
+              break
+            end
+          end
 
         else
           -- This is the first block to execute, we just started at the original, and didn't moved
@@ -134,6 +151,15 @@ M.word_move = function(target, count)
 
           if target == M.Targets.NextLongWordStart then
             if (current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace)
+            then
+              hl_start[2] = hl_start[2] + 1
+              moved_from_original = true
+            end
+          end
+
+          if target == M.Targets.NextWordEnd then
+            if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
+              or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
             then
               hl_start[2] = hl_start[2] + 1
               moved_from_original = true
