@@ -46,6 +46,7 @@ local get_prev_char = function(currentPos, line_content)
 end
 
 M.word_move = function(target, count)
+  local is_prev = target == M.Targets.PrevWordStart or target == M.Targets.PrevLongWordStart
   local line = vim.fn.line('.')
   local line_content = vim.fn.getline(line)
   local current_pos = {line, vim.fn.col('.')}
@@ -58,6 +59,74 @@ M.word_move = function(target, count)
     hl_end = {current_pos[1], current_pos[2]}
     -- this original is the first time we hit a word movement
     local moved_from_original = false
+    if is_prev then
+      while true do
+        local current_char = get_current_char(current_pos, line_content)
+        local current_type = get_character_type(current_char)
+
+        local prev_char = get_prev_char(current_pos, line_content)
+        local prev_type = get_character_type(prev_char)
+
+        if hl_start[2] ~= current_pos[2] then
+          if prev_type == CharacterType.EndOfLine then break end
+          if target == M.Targets.PrevWordStart then
+            if (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
+              or (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
+            then
+              break
+            end
+          end
+
+          if target == M.Targets.PrevLongWordStart then
+            if (current_type == CharacterType.Word and prev_type == CharacterType.WhiteSpace)
+              or (current_type == CharacterType.Punctuation and prev_type == CharacterType.WhiteSpace)
+            then
+              break
+            end
+          end
+        else
+          if moved_from_original == true then
+            if prev_type == CharacterType.EndOfLine then break end
+
+            if (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
+              or (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
+            then
+              break
+            end
+          else
+            if current_type == CharacterType.EndOfLine
+              or prev_type == CharacterType.EndOfLine
+            then
+              print("heeere")
+              -- To ignore empty lines
+              current_pos[1] = current_pos[1] - 1
+              line = current_pos[1]
+              line_content = vim.fn.getline(line)
+              current_pos[2] = #line_content
+              hl_start = {current_pos[1], current_pos[2]}
+              hl_end = {current_pos[1], current_pos[2]}
+              print("here", vim.inspect(hl_start), vim.inspect(hl_end), line, vim.inspect(line_content))
+              goto continue
+            end
+
+            if (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
+              -- or (current_type == CharacterType.WhiteSpace and prev_type ~= CharacterType.WhiteSpace)
+              or (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
+            then
+              hl_start[2] = hl_start[2] - 1
+              moved_from_original = true
+            end
+          end
+        end
+
+        current_pos[2] = current_pos[2] - 1
+        if current_pos[2] <= 1 then
+          break
+        end
+
+        ::continue::
+      end
+    else
     while true do
       -- print("evaluating for pos", vim.inspect(current_pos), vim.inspect(line_content))
       local current_char = get_current_char(current_pos, line_content)
@@ -65,9 +134,6 @@ M.word_move = function(target, count)
 
       local next_char = get_next_char(current_pos, line_content)
       local next_type = get_character_type(next_char)
-
-      local prev_char = get_prev_char(current_pos, line_content)
-      local prev_type = get_character_type(prev_char)
 
       -- print("evaluating:", current_char, current_type, next_char, next_type)
       if hl_start[2] ~= current_pos[2] then
@@ -147,8 +213,7 @@ M.word_move = function(target, count)
           end
 
           if target == M.Targets.NextWordStart then
-            if (current_type == CharacterType.Punctuation and next_type ~= CharacterType.WhiteSpace)
-              or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+            if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
               or (current_type == CharacterType.WhiteSpace and next_type == CharacterType.Word)
             then
               hl_start[2] = hl_start[2] + 1
@@ -180,9 +245,11 @@ M.word_move = function(target, count)
         break
       end
     ::continue::
-    end
+    end -- while
+    end -- if prev
   hl_end = {current_pos[1], current_pos[2]}
   end -- for
+  -- print("start", vim.inspect(hl_start), "end", vim.inspect(hl_end))
   return { hl_start, hl_end }
 end
 return M
