@@ -98,6 +98,13 @@ M.word_move = function(target, count)
             break
           end
         end
+
+        if target == M.Targets.NextLongWordEnd then
+          if (current_type ~= CharacterType.WhiteSpace and next_type == CharacterType.WhiteSpace)
+          then
+            break
+          end
+        end
       else
         -- start == current, we start highlighting the word
         if moved_from_original == true then
@@ -157,7 +164,7 @@ M.word_move = function(target, count)
             end
           end
 
-          if target == M.Targets.NextWordEnd then
+          if target == M.Targets.NextWordEnd or target == M.Targets.NextLongWordEnd then
             if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
               or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
             then
