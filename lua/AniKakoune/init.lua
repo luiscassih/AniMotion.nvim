@@ -199,7 +199,7 @@ end
 
 M.setup = function(config)
   local opts = config or {}
-  local mode = opts.mode or "word"
+  local mode = opts.mode or "kakoune"
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
   local edit = opts.edit_keys or { "c", "d", "s", "r" }
   local marks = opts.marks or {"y", "z"}
@@ -214,8 +214,8 @@ M.setup = function(config)
           kakActive = true
           highlight_selection()
         end)
-      else if mode == "kakoune" then
       else if mode == "word" then
+      else if mode == "kakoune" then
         -- Store initial position
         -- First move to the next word
         -- Then get word boundaries at new position
@@ -230,7 +230,21 @@ M.setup = function(config)
         --
         -- get_word_bounds()
         local Kakoune = require('AniKakoune.kakoune')
-        local hl = Kakoune.word_move(Kakoune.Targets.NextWordStart, vim.v.count1)
+        local target
+        if k == "w" then
+          target = Kakoune.Targets.NextWordStart
+        elseif k == "W" then
+          target = Kakoune.Targets.NextLongWordStart
+        elseif k == "b" then
+          target = Kakoune.Targets.PrevWordStart
+        elseif k == "B" then
+          target = Kakoune.Targets.PrevLongWordStart
+        elseif k == "e" then
+          target = Kakoune.Targets.NextWordEnd
+        elseif k == "E" then
+          target = Kakoune.Targets.NextLongWordEnd
+        end
+        local hl = Kakoune.word_move(target, vim.v.count1)
         start_pos = hl[1]
         end_pos = hl[2]
         -- print("start", vim.inspect(start_pos), "end", vim.inspect(end_pos))
