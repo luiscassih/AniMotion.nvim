@@ -1,5 +1,5 @@
 local M = {}
-local ns_id = vim.api.nvim_create_namespace('AniKakoune')
+local ns_id = vim.api.nvim_create_namespace('AniMotion')
 local current_mark = nil
 local current_mark_buffer = nil
 local isActive = false
@@ -72,7 +72,7 @@ M.setup = function(config)
         end)
       else if mode == "word" then
       else if mode == "kakoune" then
-        local Kakoune = require('AniKakoune.kakoune')
+        local Kakoune = require('AniMotion.kakoune')
         local target
         if k == "w" then
           target = Kakoune.Targets.NextWordStart

@@ -1,18 +1,18 @@
-# AniSelectFirst.nvim
-A neovim plugin to add a select-first approach into normal mode, inspired by helix/kakoune.
+# AniMotion.nvim
+A Neovim plugin that implements selection-first text editing, similar to Kakoune and Helix editors. Lets you see your selection as you travel, allowing quick operations like change, delete, or yank. Works in normal mode with configurable selection modes.
 
 ## Installation
-> Lazy basic defaults to "nvim" mode
+> Lazy basic defaults to "kakoune" mode
 ```lua
 return {
-  "luiscassih/AniKakoune",
+  "luiscassih/AniMotion.nvim",
   event = "VeryLazy",
   config = true
 }
 ```
 > Default config
 ```lua
-require("AniKakoune").setup({
+require("AniMotion").setup({
   mode = "kakoune", -- "nvim" or "word"
   word_keys = { "w", "b", "e", "W", "B", "E" },
   edit_keys = { "c", "d", "s", "r", "y" }, -- you can add "p" if you want.
@@ -24,11 +24,11 @@ require("AniKakoune").setup({
 
 > For lualine users
 
-You can have something like this to show an indicator if Kak mode is in use.
+You can have something like this to show an indicator if the plugin is in use.
 ```lua
 ins_left {
   function()
-    if (require("AniKakoune").isActive()) then
+    if (require("AniMotion").isActive()) then
       return "◎ SEL"
     end
     return ""
