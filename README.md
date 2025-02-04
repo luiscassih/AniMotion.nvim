@@ -1,12 +1,8 @@
 # AniSelectFirst.nvim
-A pretty simple way to do a select-first word by word navigation in neovim similar to kakoune.
-
-## Bugs
-[] - operation motions in visual mode doesn't work. For example, doing viw in normal mode select from cursor to next word instead of the current word at cursor.
-[] - Other keys do not work well in visual mode, for example G does not go to the last line, and goes to the first line instead.
+A neovim plugin to add a select-first approach into normal mode, inspired by helix/kakoune.
 
 ## Installation
-> Lazy basic
+> Lazy basic defaults to "nvim" mode
 ```lua
 return {
   "luiscassih/AniKakoune",
@@ -17,9 +13,12 @@ return {
 > Default config
 ```lua
 require("AniKakoune").setup({
+  mode = "kakoune", -- "nvim" or "word"
   word_keys = { "w", "b", "e", "W", "B", "E" },
-  edit_keys = { "c", "d", "s", "r" },
-  marks = {"y", "z"}, -- used for visual select when changing or deleting the word
+  edit_keys = { "c", "d", "s", "r", "y" }, -- you can add "p" if you want.
+  exit_keys = {"<Esc>", "<C-c>"} -- used when you want to deselect/exit from SEL mode.
+  marks = {"y", "z"}, -- Is a mark used internally in this plugin, when we do a visual select when changing or deleting the highlighted word.
+  map_visual = true, -- When true, we capture "v" and pressing it will enter visual mode with the plugin selection as part of the visual selection. When false, pressing "v" will exit SEL mode and the selection will be lost. You want to set to false if you have trouble with other mappings associated to "v". I recommend to try in true first.
 })
 ```
 
@@ -29,24 +28,30 @@ You can have something like this to show an indicator if Kak mode is in use.
 ```lua
 ins_left {
   function()
-    if (require("AniKakoune").isKakouneMode()) then
-      return "◎ Kak"
+    if (require("AniKakoune").isActive()) then
+      return "◎ SEL"
     end
     return ""
   end,
   color = { fg = colors.red, gui = 'bold' },
 }
 ```
-## Explanation
-With word_keys you activate Kak mode, which just select the word first. If you continue pressing, it will deselect and select with the next word movement.
 
-With disable_keys you deactivate the mode, which just means you can use the default behavior.
+## Diferent modes
 
-While I call this Kakoune mode, it's a little bit different, it's more a "word by word" selection first. In Kakoune, when you hit w, you select up to the beginning of the next word without including it, so you also select the space if there is one. In this plugin, is like you go word by word doing "viw" and selecting only the word.
+> kakoune - default
 
-In the example `vim.keymap.set(` if you are in the first `i` from `vim`, pressing w will select `vim`, pressing again will select `keymap`, again `set` and go on. If you are in the end of the line, pressing `w` will select the last word without jumping to the next line until you hit `w` again.
+In this mode, word motions keys will behave kakoune (or helix), it's a bit different than neovim, for example pressing `w` on a word will go up until we hit a non whitespace character. In `Hello world`, pressing at `H` will move the cursor to the space and will select `Hello `.
 
-If you want to select more than the word itself, you can use `W` or `B` like the default vim motion behavior. If you are in the middle and don't want to select the whole word, you can press `v` to enter visual and then `e` to the end or `b` to the beginning. This way you retain the motion muscle memory from vim but add a select-first approach only when it's the whole word.
+> nvim
 
-## Things to have in mind
-- "i", "I", "a", "A" motions will not work while in Kak mode because they are complex and wait for more operation keys while in visual mode. So if you want to insert or append after selecting a word, you need to exit Kak mode first (for example, by pressing C-c or Esc)
+In this mode, word motions keys will behave the same as neovim, pressing `w` will go to the first character of the next word. In `Hello world`, pressing at `H` will move the cursor to `w` and will select `Hello w`. <br/>
+You probably will not want to use this mode unless you're so used with the default `w` behavior of neovim and only want to enable the "select first" approach.
+
+> word
+
+This is my personal mode, it's similar to kakoune, but instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive.
+
+
+## Notes
+- This plugin works using the normal mode, so any key you press not captured by this plugin, it will behave normally. For example, if you have `K` mapped to lsp hover, even if you have any word selected using `w` (so in SEL mode), pressing `K` will show the hover normally.

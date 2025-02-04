@@ -104,7 +104,6 @@ M.word_move = function(target, count)
               current_pos[2] = #line_content
               hl_start = {current_pos[1], current_pos[2]}
               hl_end = {current_pos[1], current_pos[2]}
-              print("here", vim.inspect(hl_start), vim.inspect(hl_end), line, vim.inspect(line_content))
               goto continue
             end
 
@@ -210,6 +209,7 @@ M.word_move = function(target, count)
 
             if target == M.Targets.NextWordStart then
               if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+                or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
                 or (current_type == CharacterType.WhiteSpace and next_type == CharacterType.Word)
               then
                 hl_start[2] = hl_start[2] + 1
