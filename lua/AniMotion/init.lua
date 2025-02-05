@@ -106,13 +106,12 @@ M.setup = function(config)
       if isActive and start_pos and end_pos then
         vim.api.nvim_buf_set_mark(0,marks[1], start_pos[1], start_pos[2]-1, {})
         vim.api.nvim_buf_set_mark(0,marks[2], end_pos[1], end_pos[2]-1, {})
-        vim.cmd("normal! `" .. marks[1] .. "v`" .. marks[2])
-        vim.api.nvim_feedkeys(k, "n", true)
+        vim.api.nvim_feedkeys("`" .. marks[1] .. "v`" .. marks[2] .. k, "n", true)
         isActive = false
       else
-        vim.api.nvim_feedkeys(k, "n", true)
+        return k
       end
-    end, { noremap = false, nowait = true })
+    end, { noremap = false, nowait = true, expr = true })
   end
 
   if map_visual then
@@ -122,16 +121,17 @@ M.setup = function(config)
         if start_pos and end_pos then
           vim.api.nvim_buf_set_mark(0,'<', start_pos[1], start_pos[2]-1, {})
           vim.api.nvim_buf_set_mark(0,'>', start_pos[1], end_pos[2]-1, {})
-          vim.cmd("normal! `<v`>")
+          -- vim.cmd("normal! `<v`>")
+          vim.api.nvim_feedkeys("`<v`>", "n", true)
           if start_pos[2] > end_pos[2] then
             vim.api.nvim_feedkeys("o", "n", true)
           end
         end
         isActive = false
       else
-        vim.api.nvim_feedkeys("v", "n", true)
+        return 'v'
       end
-    end, { noremap = false, nowait = true })
+    end, { noremap = false, nowait = true, expr = true })
   end
 
   for _, k in ipairs(exit) do
@@ -140,9 +140,9 @@ M.setup = function(config)
         clear_highlight()
         isActive = false
       else
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(k, true, false, true), "n", true)
+        return k
       end
-    end, { noremap = false, nowait = true })
+    end, { noremap = false, nowait = true, expr = true })
   end
 
   vim.api.nvim_create_autocmd('ModeChanged', {
