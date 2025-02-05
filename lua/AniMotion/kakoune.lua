@@ -97,7 +97,11 @@ M.word_move = function(target, count)
             if current_type == CharacterType.EndOfLine
               or prev_type == CharacterType.EndOfLine
             then
-              -- To ignore empty lines
+              -- check if we are not at the beginning of the file
+              if current_pos[1] == 1 then
+                break
+              end
+              -- Keep jumping if line is empty
               current_pos[1] = current_pos[1] - 1
               line = current_pos[1]
               line_content = vim.fn.getline(line)
@@ -197,7 +201,11 @@ M.word_move = function(target, count)
             if current_type == CharacterType.EndOfLine
               or next_type == CharacterType.EndOfLine
             then
-              -- To ignore empty lines
+              -- check if we are not at the end of the file
+              if current_pos[1] == vim.fn.line('$') then
+                break
+              end
+              -- Keep jumping if line is empty
               current_pos[1] = current_pos[1] + 1
               current_pos[2] = 1
               hl_start = {current_pos[1], current_pos[2]}
