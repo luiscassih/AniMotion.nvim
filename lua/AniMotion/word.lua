@@ -3,6 +3,22 @@ local CharacterType = Utils.CharacterType
 local M = {}
 
 M.word_move = function(target, count)
+  if target == Utils.Targets.NextWordEnd then
+    target = Utils.Targets.NextWordStart
+  end
+
+  if target == Utils.Targets.NextLongWordEnd then
+    target = Utils.Targets.NextLongWordStart
+  end
+
+  if target == Utils.Targets.PrevWordEnd then
+    target = Utils.Targets.PrevWordStart
+  end
+
+  if target == Utils.Targets.PrevLongWordEnd then
+    target = Utils.Targets.PrevLongWordStart
+  end
+
   local is_prev = target == Utils.Targets.PrevWordStart or target == Utils.Targets.PrevLongWordStart
   local line = vim.fn.line('.')
   local line_content = vim.fn.getline(line)
@@ -97,37 +113,36 @@ M.word_move = function(target, count)
           if next_type == CharacterType.EndOfLine then break end
 
           if target == Utils.Targets.NextWordStart then
-            if (current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace)
-              or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
-              or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
+            if (current_type ~= next_type)
             then
               break
             end
           end
 
           if target == Utils.Targets.NextLongWordStart then
-            if (current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace)
+            if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
             then
               break
             end
           end
 
-          if target == Utils.Targets.NextWordEnd then
-            if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
-              or (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
-              or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
-            then
-              break
-            end
-          end
-
-          if target == Utils.Targets.NextLongWordEnd then
-            if (current_type ~= CharacterType.WhiteSpace and next_type == CharacterType.WhiteSpace)
-            then
-              break
-            end
-          end
         else
+          if current_type == CharacterType.EndOfLine
+            or next_type == CharacterType.EndOfLine
+          then
+            -- check if we are not at the end of the file
+            if current_pos[1] == vim.fn.line('$') then
+              break
+            end
+            -- Keep jumping if line is empty
+            current_pos[1] = current_pos[1] + 1
+            current_pos[2] = 1
+            hl_start = {current_pos[1], current_pos[2]}
+            hl_end = {current_pos[1], current_pos[2]}
+            line = current_pos[1]
+            line_content = vim.fn.getline(line)
+            goto continue
+          end
           -- start == current, we start highlighting the word
           if moved_from_original == true then
             -- we already skipped the first character, for example, when we start at the space before a word
@@ -135,64 +150,23 @@ M.word_move = function(target, count)
             -- we start in space, we keep and moved_from_original is true, so we highlight all the non-word
             -- characters until we hit a word, so the result is "((" being highlighted
             if next_type == CharacterType.EndOfLine then break end
-            if target == Utils.Targets.NextWordStart then
-              if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
-                or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
+
+            if target == Utils.Targets.NextWordStart or target == Utils.Targets.NextLongWordStart then
+              if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
               then
                 break
               end
-            end
-
-            -- NextLongWordStart doesn't need because punctuation and word are equal
-
-            if target == Utils.Targets.NextWordEnd then
-              if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
-                or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
+              if (current_type ~= CharacterType.Word)
               then
-                break
+                hl_start[2] = hl_start[2] + 1
               end
             end
 
           else
             -- This is the first block to execute, we just started at the original, and didn't moved
-            if current_type == CharacterType.EndOfLine
-              or next_type == CharacterType.EndOfLine
-            then
-              -- check if we are not at the end of the file
-              if current_pos[1] == vim.fn.line('$') then
-                break
-              end
-              -- Keep jumping if line is empty
-              current_pos[1] = current_pos[1] + 1
-              current_pos[2] = 1
-              hl_start = {current_pos[1], current_pos[2]}
-              hl_end = {current_pos[1], current_pos[2]}
-              line = current_pos[1]
-              line_content = vim.fn.getline(line)
-              goto continue
-            end
-
-            if target == Utils.Targets.NextWordStart then
-              if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)
-                or (current_type == CharacterType.Punctuation and next_type == CharacterType.Word)
-                or (current_type == CharacterType.WhiteSpace and next_type == CharacterType.Word)
-              then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
-            end
-
-            if target == Utils.Targets.NextLongWordStart then
-              if (current_type == CharacterType.WhiteSpace and next_type ~= CharacterType.WhiteSpace)
-              then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
-            end
-
-            if target == Utils.Targets.NextWordEnd or target == Utils.Targets.NextLongWordEnd then
-              if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
-                or (current_type == CharacterType.Punctuation and next_type ~= CharacterType.Punctuation)
+            if target == Utils.Targets.NextWordStart or target == Utils.Targets.NextLongWordStart then
+              if (current_type ~= next_type)
+                or (current_type == CharacterType.WhiteSpace)
               then
                 hl_start[2] = hl_start[2] + 1
                 moved_from_original = true

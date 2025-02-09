@@ -1,3 +1,4 @@
+local Utils = require('AniMotion.utils')
 local M = {}
 local ns_id = vim.api.nvim_create_namespace('AniMotion')
 local current_mark = nil
@@ -5,6 +6,7 @@ local current_mark_buffer = nil
 local isActive = false
 local start_pos = nil
 local end_pos = nil
+local hl_group = "@AniMotion"
 
 M.isActive = function()
   return isActive
@@ -44,7 +46,7 @@ local function highlight_selection()
       current_mark = vim.api.nvim_buf_set_extmark(current_buffer, ns_id, start_pos[1] -1, hl_start -1, {
         end_row = end_pos[1] -1,
         end_col = hl_end,
-        hl_group = 'Visual',
+        hl_group = hl_group,
       })
       current_mark_buffer = current_buffer
     end
@@ -56,12 +58,39 @@ M.setup = function(config)
   local mode = opts.mode or "kakoune"
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
   local edit = opts.edit_keys or { "c", "d", "s", "r", "y" }
-  local exit = opts.exit_keys or {"<Esc>", "<C-c>"}
+  local clear = opts.clear_keys or { "<Esc>" }
   local marks = opts.marks or {"y", "z"}
   local map_visual = opts.map_visual or true
+  local hl_color = { bg = "#673AB7"}
+  if opts.color then
+    if opts.color == "Visual" then
+      hl_group = "Visual"
+    else
+      if type(opts.color) == "table" then
+        hl_color = opts.color
+      else
+        vim.notify("AniMotion: opts.color must be either 'Visual' or a table with highlight attributes", vim.log.levels.WARN)
+      end
+    end
+  end
+  vim.api.nvim_set_hl(0, "@AniMotion", hl_color)
 
   for _, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
+      local target
+      if k == "w" then
+        target = Utils.Targets.NextWordStart
+      elseif k == "W" then
+        target = Utils.Targets.NextLongWordStart
+      elseif k == "b" then
+        target = Utils.Targets.PrevWordStart
+      elseif k == "B" then
+        target = Utils.Targets.PrevLongWordStart
+      elseif k == "e" then
+        target = Utils.Targets.NextWordEnd
+      elseif k == "E" then
+        target = Utils.Targets.NextLongWordEnd
+      end
       if mode == "nvim" then
         start_pos = { vim.fn.line('.'), vim.fn.col('.') }
         vim.cmd("normal! " .. (vim.v.count > 0 and (vim.v.count .. k) or k))
@@ -70,24 +99,14 @@ M.setup = function(config)
           isActive = true
           highlight_selection()
         end)
-      else if mode == "word" then
-      else if mode == "kakoune" then
-        local Kakoune = require('AniMotion.kakoune')
-        local target
-        if k == "w" then
-          target = Kakoune.Targets.NextWordStart
-        elseif k == "W" then
-          target = Kakoune.Targets.NextLongWordStart
-        elseif k == "b" then
-          target = Kakoune.Targets.PrevWordStart
-        elseif k == "B" then
-          target = Kakoune.Targets.PrevLongWordStart
-        elseif k == "e" then
-          target = Kakoune.Targets.NextWordEnd
-        elseif k == "E" then
-          target = Kakoune.Targets.NextLongWordEnd
+      else
+        local mode_util
+        if mode == "word" or mode == "kakoune" then
+          mode_util = require('AniMotion.word')
+        else
+          mode_util = require('AniMotion.kakoune')
         end
-        local hl = Kakoune.word_move(target, vim.v.count1)
+        local hl = mode_util.word_move(target, vim.v.count1)
         start_pos = hl[1]
         end_pos = hl[2]
         vim.fn.cursor(end_pos[1], end_pos[2])
@@ -95,8 +114,6 @@ M.setup = function(config)
           isActive = true
           highlight_selection()
         end)
-      end
-      end
       end
     end)
   end
@@ -134,7 +151,7 @@ M.setup = function(config)
     end, { noremap = false, nowait = true, expr = true })
   end
 
-  for _, k in ipairs(exit) do
+  for _, k in ipairs(clear) do
     vim.keymap.set({ 'n' }, k, function()
       if isActive then
         clear_highlight()

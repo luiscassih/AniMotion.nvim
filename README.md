@@ -16,9 +16,10 @@ require("AniMotion").setup({
   mode = "kakoune", -- "nvim" or "word"
   word_keys = { "w", "b", "e", "W", "B", "E" },
   edit_keys = { "c", "d", "s", "r", "y" }, -- you can add "p" if you want.
-  exit_keys = {"<Esc>", "<C-c>"} -- used when you want to deselect/exit from SEL mode.
+  clear_keys = { "<Esc>", "<C-c>" } -- used when you want to deselect/exit from SEL mode.
   marks = {"y", "z"}, -- Is a mark used internally in this plugin, when we do a visual select when changing or deleting the highlighted word.
   map_visual = true, -- When true, we capture "v" and pressing it will enter visual mode with the plugin selection as part of the visual selection. When false, pressing "v" will exit SEL mode and the selection will be lost. You want to set to false if you have trouble with other mappings associated to "v". I recommend to try in true first.
+  color = { } -- put "Visual" to use the default visual mode color.
 })
 ```
 
@@ -51,6 +52,16 @@ You probably will not want to use this mode unless you're so used with the defau
 > word
 
 This is my personal mode, it's similar to kakoune, but instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive.
+
+Also, instead of having the cursor at the end of the word like in Kakoune, in this mode it will be at the start of the word, like in neovim, if you need to be at the end, just press `e` instead. `e` will also highlight the entire word like `w`. In the example before, both w and e will highlight the same way, but with w, the cursor will be at `v` -> `k` -> `s` -> `a`, while with e, the cursor will be at `m` -> `k` -> `s` -> `a`.
+
+A succession of punctuation characters are also considered a word. `vim..keymap` will have this highlight flow -> `vim` -> `..` -> `keymap`.
+
+Using `W` in this mode will highlight words alongside with punctuation only if they have just one punctuation in succession. For example `vim.keymap-set-key` will have the following highlight flow:
+- Using `w`: `vim` -> `keymap` -> `set` -> `key`.
+- Using `W`: `vim` -> `keymap-set-key`.
+
+<!-- Also, inside quotes `'"` punctuation characters can be highlighted, for example normally in a string like `("a<")`, the punctuation `<` would not be highlighted unless it's more than one, like `a<<`, but in this mode pressing `w` when the cursor is at `(` will move and highlight `a<`, unless the string is `("aa<<<")`, on that case, `aa` and `<<<` are clear different words.  -->
 
 
 ## Notes
