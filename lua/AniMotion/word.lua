@@ -3,20 +3,19 @@ local CharacterType = Utils.CharacterType
 local M = {}
 
 M.word_move = function(target, count)
-  if target == Utils.Targets.NextWordEnd then
-    target = Utils.Targets.NextWordStart
-  end
-
-  if target == Utils.Targets.NextLongWordEnd then
-    target = Utils.Targets.NextLongWordStart
-  end
-
-  if target == Utils.Targets.PrevWordEnd then
-    target = Utils.Targets.PrevWordStart
-  end
-
-  if target == Utils.Targets.PrevLongWordEnd then
-    target = Utils.Targets.PrevLongWordStart
+  if target == Utils.Targets.NextWordEnd
+    or target == Utils.Targets.NextLongWordEnd
+    or target == Utils.Targets.NextLongWordStart
+    or target == Utils.Targets.PrevLongWordStart
+  then
+    local helix = require('AniMotion.helix')
+    if target == Utils.Targets.NextLongWordStart then
+      target = Utils.Targets.NextWordStart
+    end
+    if target == Utils.Targets.PrevLongWordStart then
+      target = Utils.Targets.PrevWordStart
+    end
+    return helix.word_move(target, count)
   end
 
   local is_prev = target == Utils.Targets.PrevWordStart or target == Utils.Targets.PrevLongWordStart
@@ -42,50 +41,42 @@ M.word_move = function(target, count)
 
         if hl_start[2] ~= current_pos[2] then
           if prev_type == CharacterType.EndOfLine then break end
-          if target == Utils.Targets.PrevWordStart then
-            if (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
-              or (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
-            then
-              break
-            end
-          end
 
-          if target == Utils.Targets.PrevLongWordStart then
-            if (current_type == CharacterType.Word and prev_type == CharacterType.WhiteSpace)
-              or (current_type == CharacterType.Punctuation and prev_type == CharacterType.WhiteSpace)
-            then
-              break
-            end
+          if (current_type ~= prev_type)
+          then
+            break
           end
         else
+          if current_type == CharacterType.EndOfLine
+            or prev_type == CharacterType.EndOfLine
+          then
+            -- check if we are not at the beginning of the file
+            if current_pos[1] == 1 then
+              break
+            end
+            -- Keep jumping if line is empty
+            current_pos[1] = current_pos[1] - 1
+            line = current_pos[1]
+            line_content = vim.fn.getline(line)
+            current_pos[2] = #line_content
+            hl_start = {current_pos[1], current_pos[2]}
+            hl_end = {current_pos[1], current_pos[2]}
+            goto continue
+          end
           if moved_from_original == true then
             if prev_type == CharacterType.EndOfLine then break end
 
-            if (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
-              or (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
+            if (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
             then
               break
             end
-          else
-            if current_type == CharacterType.EndOfLine
-              or prev_type == CharacterType.EndOfLine
+            if (current_type ~= CharacterType.Word)
             then
-              -- check if we are not at the beginning of the file
-              if current_pos[1] == 1 then
-                break
-              end
-              -- Keep jumping if line is empty
-              current_pos[1] = current_pos[1] - 1
-              line = current_pos[1]
-              line_content = vim.fn.getline(line)
-              current_pos[2] = #line_content
-              hl_start = {current_pos[1], current_pos[2]}
-              hl_end = {current_pos[1], current_pos[2]}
-              goto continue
+              hl_start[2] = hl_start[2] - 1
             end
-
-            if (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
-              or (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
+          else
+            if (current_type ~= prev_type)
+              or (current_type == CharacterType.WhiteSpace)
             then
               hl_start[2] = hl_start[2] - 1
               moved_from_original = true
@@ -119,12 +110,12 @@ M.word_move = function(target, count)
             end
           end
 
-          if target == Utils.Targets.NextLongWordStart then
-            if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
-            then
-              break
-            end
-          end
+          -- if target == Utils.Targets.NextLongWordStart then
+          --   if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
+          --   then
+          --     break
+          --   end
+          -- end
 
         else
           if current_type == CharacterType.EndOfLine
@@ -162,16 +153,16 @@ M.word_move = function(target, count)
               end
             end
 
-            if target == Utils.Targets.NextLongWordStart then
-              if (current_type == CharacterType.Word and next_type ~= CharacterType.Word and next_char ~= '-')
-              then
-                break
-              end
-              if (current_type ~= CharacterType.Word)
-              then
-                hl_start[2] = hl_start[2] + 1
-              end
-            end
+            -- if target == Utils.Targets.NextLongWordStart then
+            --   if (current_type == CharacterType.Word and next_type ~= CharacterType.Word and next_char ~= '-')
+            --   then
+            --     break
+            --   end
+            --   if (current_type ~= CharacterType.Word)
+            --   then
+            --     hl_start[2] = hl_start[2] + 1
+            --   end
+            -- end
 
           else
             -- This is the first block to execute, we just started at the original, and didn't moved
@@ -184,14 +175,14 @@ M.word_move = function(target, count)
               end
             end
 
-            if target == Utils.Targets.NextLongWordStart then
-              if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
-                or (current_type == CharacterType.WhiteSpace)
-              then
-                hl_start[2] = hl_start[2] + 1
-                moved_from_original = true
-              end
-            end
+            -- if target == Utils.Targets.NextLongWordStart then
+            --   if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
+            --     or (current_type == CharacterType.WhiteSpace)
+            --   then
+            --     hl_start[2] = hl_start[2] + 1
+            --     moved_from_original = true
+            --   end
+            -- end
           end
         end -- end else start == curent
 
