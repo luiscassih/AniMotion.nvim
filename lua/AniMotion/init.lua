@@ -104,7 +104,7 @@ M.setup = function(config)
         if mode == "helix" then
           mode_util = require('AniMotion.helix')
         else
-          mode_util = require('AniMotion.word')
+          mode_util = require('AniMotion.animotion')
         end
         local hl = mode_util.word_move(target, vim.v.count1)
         start_pos = hl[1]

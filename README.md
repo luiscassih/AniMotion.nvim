@@ -13,7 +13,7 @@ return {
 > Default config
 ```lua
 require("AniMotion").setup({
-  mode = "helix", -- "nvim" or "word"
+  mode = "helix", -- "nvim" or "animotion"
   word_keys = { "w", "b", "e", "W", "B", "E" },
   edit_keys = { "c", "d", "s", "r", "y" }, -- you can add "p" if you want.
   clear_keys = { "<Esc>" } -- used when you want to deselect/exit from SEL mode.
@@ -49,19 +49,11 @@ In this mode, word motions keys will behave helix (or kakoune), it's a bit diffe
 In this mode, word motions keys will behave the same as neovim, pressing `w` will go to the first character of the next word. In `Hello world`, pressing at `H` will move the cursor to `w` and will select `Hello w`. <br/>
 You probably will not want to use this mode unless you're so used with the default `w` behavior of neovim and only want to enable the "select first" approach.
 
-> word
+> animotion
 
-This is my personal mode, it's similar to helix, but instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive.
+This is my personal mode, for `w` and `b`, instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive. The rest of jumps `e` `E` will go to helix mode, and `W` `B` will also go to helix mode but with the short jump instead. `W` will behave as `w` and `B` as `b` with helix mode.
 
-Also, instead of having the cursor at the end of the word like in helix, in this mode it will be at the start of the word, like in neovim, if you need to be at the end, just press `e` instead. `e` will also highlight the entire word like `w`. In the example before, both w and e will highlight the same way, but with w, the cursor will be at `v` -> `k` -> `s` -> `a`, while with e, the cursor will be at `m` -> `k` -> `s` -> `a`.
-
-A succession of punctuation characters are also considered a word. `vim..keymap` will have this highlight flow -> `vim` -> `..` -> `keymap`.
-
-Using `W` in this mode will highlight words alongside with punctuation only if they have just one punctuation in succession. For example `vim.keymap-set-key` will have the following highlight flow:
-- Using `w`: `vim` -> `keymap` -> `set` -> `key`.
-- Using `W`: `vim` -> `keymap-set-key`.
-
-<!-- Also, inside quotes `'"` punctuation characters can be highlighted, for example normally in a string like `("a<")`, the punctuation `<` would not be highlighted unless it's more than one, like `a<<`, but in this mode pressing `w` when the cursor is at `(` will move and highlight `a<`, unless the string is `("aa<<<")`, on that case, `aa` and `<<<` are clear different words.  -->
+So, this mode is an hybrid helix with a custom `w` `b`. The mind approach for this mode is: "Most of the time I only want to change words, so I keep pressing `w`, if I need to change punctuation, I press `W`"
 
 
 ## Notes
