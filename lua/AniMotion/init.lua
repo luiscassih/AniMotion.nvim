@@ -55,7 +55,7 @@ end
 
 M.setup = function(config)
   local opts = config or {}
-  local mode = opts.mode or "kakoune"
+  local mode = opts.mode or "helix"
   local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
   local edit = opts.edit_keys or { "c", "d", "s", "r", "y" }
   local clear = opts.clear_keys or { "<Esc>" }
@@ -101,10 +101,10 @@ M.setup = function(config)
         end)
       else
         local mode_util
-        if mode == "word" or mode == "kakoune" then
-          mode_util = require('AniMotion.word')
+        if mode == "helix" then
+          mode_util = require('AniMotion.helix')
         else
-          mode_util = require('AniMotion.kakoune')
+          mode_util = require('AniMotion.word')
         end
         local hl = mode_util.word_move(target, vim.v.count1)
         start_pos = hl[1]
