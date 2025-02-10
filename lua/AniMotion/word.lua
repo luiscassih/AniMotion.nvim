@@ -151,8 +151,19 @@ M.word_move = function(target, count)
             -- characters until we hit a word, so the result is "((" being highlighted
             if next_type == CharacterType.EndOfLine then break end
 
-            if target == Utils.Targets.NextWordStart or target == Utils.Targets.NextLongWordStart then
+            if target == Utils.Targets.NextWordStart then
               if (current_type == CharacterType.Word and next_type ~= CharacterType.Word)
+              then
+                break
+              end
+              if (current_type ~= CharacterType.Word)
+              then
+                hl_start[2] = hl_start[2] + 1
+              end
+            end
+
+            if target == Utils.Targets.NextLongWordStart then
+              if (current_type == CharacterType.Word and next_type ~= CharacterType.Word and next_char ~= '-')
               then
                 break
               end
@@ -164,8 +175,17 @@ M.word_move = function(target, count)
 
           else
             -- This is the first block to execute, we just started at the original, and didn't moved
-            if target == Utils.Targets.NextWordStart or target == Utils.Targets.NextLongWordStart then
+            if target == Utils.Targets.NextWordStart then
               if (current_type ~= next_type)
+                or (current_type == CharacterType.WhiteSpace)
+              then
+                hl_start[2] = hl_start[2] + 1
+                moved_from_original = true
+              end
+            end
+
+            if target == Utils.Targets.NextLongWordStart then
+              if (current_type ~= next_type and next_char ~= '-' and current_char ~= '-')
                 or (current_type == CharacterType.WhiteSpace)
               then
                 hl_start[2] = hl_start[2] + 1
