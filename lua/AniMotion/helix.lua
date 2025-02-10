@@ -42,6 +42,25 @@ M.word_move = function(target, count)
             end
           end
         else
+          if current_type == CharacterType.EndOfLine
+            or prev_type == CharacterType.EndOfLine
+            or current_type == CharacterType.Unknown
+          then
+            if moved_from_original and current_type ~= CharacterType.Unknown then break end
+            -- check if we are not at the beginning of the file
+            if current_pos[1] == 1 then
+              break
+            end
+            -- Keep jumping if line is empty
+            current_pos[1] = current_pos[1] - 1
+            line = current_pos[1]
+            line_content = vim.fn.getline(line)
+            current_pos[2] = #line_content
+            hl_start = {current_pos[1], current_pos[2]}
+            hl_end = {current_pos[1], current_pos[2]}
+            moved_from_original = true
+            goto continue
+          end
           if moved_from_original == true then
             if prev_type == CharacterType.EndOfLine then break end
 
@@ -51,23 +70,6 @@ M.word_move = function(target, count)
               break
             end
           else
-            if current_type == CharacterType.EndOfLine
-              or prev_type == CharacterType.EndOfLine
-            then
-              -- check if we are not at the beginning of the file
-              if current_pos[1] == 1 then
-                break
-              end
-              -- Keep jumping if line is empty
-              current_pos[1] = current_pos[1] - 1
-              line = current_pos[1]
-              line_content = vim.fn.getline(line)
-              current_pos[2] = #line_content
-              hl_start = {current_pos[1], current_pos[2]}
-              hl_end = {current_pos[1], current_pos[2]}
-              goto continue
-            end
-
             if (current_type == CharacterType.Punctuation and prev_type ~= CharacterType.Punctuation)
               or (current_type == CharacterType.Word and prev_type ~= CharacterType.Word)
             then
@@ -128,6 +130,25 @@ M.word_move = function(target, count)
             end
           end
         else
+          if current_type == CharacterType.EndOfLine
+            or next_type == CharacterType.EndOfLine
+            or current_type == CharacterType.Unknown
+          then
+            if moved_from_original and current_type ~= CharacterType.Unknown then break end
+            -- check if we are not at the end of the file
+            if current_pos[1] == vim.fn.line('$') then
+              break
+            end
+            -- Keep jumping if line is empty
+            current_pos[1] = current_pos[1] + 1
+            current_pos[2] = 1
+            hl_start = {current_pos[1], current_pos[2]}
+            hl_end = {current_pos[1], current_pos[2]}
+            line = current_pos[1]
+            line_content = vim.fn.getline(line)
+            moved_from_original = true
+            goto continue
+          end
           -- start == current, we start highlighting the word
           if moved_from_original == true then
             -- we already skipped the first character, for example, when we start at the space before a word
@@ -155,22 +176,6 @@ M.word_move = function(target, count)
 
           else
             -- This is the first block to execute, we just started at the original, and didn't moved
-            if current_type == CharacterType.EndOfLine
-              or next_type == CharacterType.EndOfLine
-            then
-              -- check if we are not at the end of the file
-              if current_pos[1] == vim.fn.line('$') then
-                break
-              end
-              -- Keep jumping if line is empty
-              current_pos[1] = current_pos[1] + 1
-              current_pos[2] = 1
-              hl_start = {current_pos[1], current_pos[2]}
-              hl_end = {current_pos[1], current_pos[2]}
-              line = current_pos[1]
-              line_content = vim.fn.getline(line)
-              goto continue
-            end
 
             if target == Utils.Targets.NextWordStart then
               if (current_type ~= CharacterType.Punctuation and next_type == CharacterType.Punctuation)

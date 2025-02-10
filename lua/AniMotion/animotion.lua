@@ -48,8 +48,10 @@ M.word_move = function(target, count)
           end
         else
           if current_type == CharacterType.EndOfLine
+            or current_type == CharacterType.Unknown
             or prev_type == CharacterType.EndOfLine
           then
+            if moved_from_original and current_type ~= CharacterType.Unknown then break end
             -- check if we are not at the beginning of the file
             if current_pos[1] == 1 then
               break
@@ -61,6 +63,7 @@ M.word_move = function(target, count)
             current_pos[2] = #line_content
             hl_start = {current_pos[1], current_pos[2]}
             hl_end = {current_pos[1], current_pos[2]}
+            moved_from_original = true
             goto continue
           end
           if moved_from_original == true then
@@ -118,9 +121,11 @@ M.word_move = function(target, count)
           -- end
 
         else
-          if current_type == CharacterType.EndOfLine
+          if current_type == CharacterType.Unknown
+            or current_type == CharacterType.EndOfLine
             or next_type == CharacterType.EndOfLine
           then
+            if moved_from_original and current_type ~= CharacterType.Unknown then break end
             -- check if we are not at the end of the file
             if current_pos[1] == vim.fn.line('$') then
               break
@@ -132,6 +137,7 @@ M.word_move = function(target, count)
             hl_end = {current_pos[1], current_pos[2]}
             line = current_pos[1]
             line_content = vim.fn.getline(line)
+            moved_from_original = true
             goto continue
           end
           -- start == current, we start highlighting the word

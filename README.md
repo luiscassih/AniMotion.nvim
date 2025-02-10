@@ -55,6 +55,13 @@ This is my personal mode, for `w` and `b`, instead of highlighting spaces and pu
 
 So, this mode is an hybrid helix with a custom `w` `b`. The mind approach for this mode is: "Most of the time I only want to change words, so I keep pressing `w`, if I need to change punctuation, I press `W`"
 
+## Motivation and reason of existence
+
+I love neovim and I can't imagine coding without it anymore, but saying that, I was intrigued by the visual selection-first approach of helix and kakoune, but I didn't wanted to spend so much time getting used to their keybinds and using vim keybinds plugin in Helix didn't feel right, so I decided to make this plugin.
+
+The main feature I was using and liked from helix was the selection navigation used with `w` and `b`, while in vim we have `viw` which is great, but navigating and then changing words fast with helix felt more natural. So bringing this motion was the main motivation for this plugin. As for the other motions, I didn't see the need, as neovim motion cover all of them pretty naturally. Want to select a paragraph? `vip`, same with block, quotes, up to a character, and go on, I didn't see the need to change them.
+
+After playing with helix mode in `w` and `b`, I noticed that what I really wanted is to hop by words over and over, and while helix does that, it also select spaces and hop between punctuation. What I mean is, a pretty common code is to have `object.function()` or `pointer->member`, on most cases of editing portion of code like these, you usually want to change the name of the function, member or object, you don't usually want to change the punctuation, so jumping at each `.` or `->` or `(` feels a waste of motions. In `Object.getInstance().function()` I have to press `w` 5 times to get to `function` while with `animotion` you need to press 3 times, doesn't look so different, but in practice it made much difference and feels more natural to travel this way. And in case you need to still jump within punctuation, you can press with shift, so `W` and will behave the same as helix, having both worlds.
 
 ## Notes
 - This plugin works using the normal mode, so any key you press not captured by this plugin, it will behave normally. For example, if you have `K` mapped to lsp hover, even if you have any word selected using `w` (so in SEL mode), pressing `K` will show the hover normally.
