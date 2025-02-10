@@ -1,5 +1,5 @@
 # AniMotion.nvim
-A Neovim plugin that implements selection-first text editing, similar to Kakoune and Helix editors. Lets you see your selection as you travel, allowing quick operations like change, delete, or yank. Works in normal mode with configurable selection modes.
+A Neovim plugin that implements selection-first text editing, similar to Helix and Kakoune editors. Lets you see your selection as you travel, allowing quick operations like change, delete, or yank. Works in normal mode with configurable selection modes.
 
 ## Installation
 > Lazy basic defaults to "helix" mode
@@ -40,9 +40,9 @@ ins_left {
 
 ## Diferent modes
 
-> kakoune - default
+> helix - default
 
-In this mode, word motions keys will behave kakoune (or helix), it's a bit different than neovim, for example pressing `w` on a word will go up until we hit a non whitespace character. In `Hello world`, pressing at `H` will move the cursor to the space and will select `Hello `.
+In this mode, word motions keys will behave helix (or kakoune), it's a bit different than neovim, for example pressing `w` on a word will go up until we hit a non whitespace character. In `Hello world`, pressing at `H` will move the cursor to the space and will select `Hello `.
 
 > nvim
 
@@ -51,9 +51,9 @@ You probably will not want to use this mode unless you're so used with the defau
 
 > word
 
-This is my personal mode, it's similar to kakoune, but instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive.
+This is my personal mode, it's similar to helix, but instead of highlighting spaces and punctuation characters, it's selects words by words. For example, in `vim.keymap.set("a"`, w will select `vim`, w again `keymap`, w again `set`, w again `a`. I find this approach to be more productive.
 
-Also, instead of having the cursor at the end of the word like in Kakoune, in this mode it will be at the start of the word, like in neovim, if you need to be at the end, just press `e` instead. `e` will also highlight the entire word like `w`. In the example before, both w and e will highlight the same way, but with w, the cursor will be at `v` -> `k` -> `s` -> `a`, while with e, the cursor will be at `m` -> `k` -> `s` -> `a`.
+Also, instead of having the cursor at the end of the word like in helix, in this mode it will be at the start of the word, like in neovim, if you need to be at the end, just press `e` instead. `e` will also highlight the entire word like `w`. In the example before, both w and e will highlight the same way, but with w, the cursor will be at `v` -> `k` -> `s` -> `a`, while with e, the cursor will be at `m` -> `k` -> `s` -> `a`.
 
 A succession of punctuation characters are also considered a word. `vim..keymap` will have this highlight flow -> `vim` -> `..` -> `keymap`.
 
