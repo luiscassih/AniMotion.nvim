@@ -14,7 +14,14 @@ return {
 ```lua
 require("AniMotion").setup({
   mode = "helix", -- "nvim" or "animotion"
-  word_keys = { "w", "b", "e", "W", "B", "E" },
+  word_keys = {
+    [Utils.Targets.NextWordStart] = "w",
+    [Utils.Targets.NextWordEnd] = "e",
+    [Utils.Targets.PrevWordStart] = "b",
+    [Utils.Targets.NextLongWordStart] = "W",
+    [Utils.Targets.NextLongWordEnd] = "E",
+    [Utils.Targets.PrevLongWordStart] = "B",
+  }, -- you can get the targets by local Utils = require("Animotion.Utils")
   edit_keys = { "c", "d", "s", "r", "y" }, -- you can add "p" if you want.
   clear_keys = { "<Esc>" } -- used when you want to deselect/exit from SEL mode.
   marks = {"y", "z"}, -- Is a mark used internally in this plugin, when we do a visual select when changing or deleting the highlighted word.

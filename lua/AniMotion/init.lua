@@ -56,7 +56,14 @@ end
 M.setup = function(config)
   local opts = config or {}
   local mode = opts.mode or "helix"
-  local word = opts.word_keys or { "w", "b", "e", "W", "B", "E" }
+  local word = opts.word_keys or {
+    [Utils.Targets.NextWordStart] = "w",
+    [Utils.Targets.NextWordEnd] = "e",
+    [Utils.Targets.PrevWordStart] = "b",
+    [Utils.Targets.NextLongWordStart] = "W",
+    [Utils.Targets.NextLongWordEnd] = "E",
+    [Utils.Targets.PrevLongWordStart] = "B",
+  }
   local edit = opts.edit_keys or { "c", "d", "s", "r", "y" }
   local clear = opts.clear_keys or { "<Esc>" }
   local marks = opts.marks or {"y", "z"}
@@ -75,22 +82,8 @@ M.setup = function(config)
   end
   vim.api.nvim_set_hl(0, "@AniMotion", hl_color)
 
-  for _, k in ipairs(word) do
+  for target, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
-      local target
-      if k == "w" then
-        target = Utils.Targets.NextWordStart
-      elseif k == "W" then
-        target = Utils.Targets.NextLongWordStart
-      elseif k == "b" then
-        target = Utils.Targets.PrevWordStart
-      elseif k == "B" then
-        target = Utils.Targets.PrevLongWordStart
-      elseif k == "e" then
-        target = Utils.Targets.NextWordEnd
-      elseif k == "E" then
-        target = Utils.Targets.NextLongWordEnd
-      end
       if mode == "nvim" then
         start_pos = { vim.fn.line('.'), vim.fn.col('.') }
         vim.cmd("normal! " .. (vim.v.count > 0 and (vim.v.count .. k) or k))
