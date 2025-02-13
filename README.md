@@ -1,6 +1,19 @@
 # AniMotion.nvim
 A Neovim plugin that implements selection-first text editing, similar to Helix and Kakoune editors. Lets you see your selection as you travel, allowing quick operations like change, delete, or yank. Works in normal mode without entering visual mode and several configurable selection modes.
 
+## Video
+
+> Animotion - Default
+
+https://github.com/user-attachments/assets/c81da9d8-be48-4b40-b1b5-7c25e3be993e
+
+
+> Helix
+
+https://github.com/user-attachments/assets/6ae9cd89-5691-416a-9f9d-9704b5f729e5
+
+
+
 ## Installation
 > Lazy basic defaults to "helix" mode
 ```lua
