@@ -55,7 +55,7 @@ end
 
 M.setup = function(config)
   local opts = config or {}
-  local mode = opts.mode or "helix"
+  local mode = opts.mode or "animotion"
   local word = opts.word_keys or {
     [Utils.Targets.NextWordStart] = "w",
     [Utils.Targets.NextWordEnd] = "e",
