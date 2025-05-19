@@ -28,7 +28,7 @@ return {
 
 ```lua
 return {
-  "luiscassih/AniKakoune",
+  "luiscassih/AniMotion.nvim",
   event = "VeryLazy",
   config = function()
     require("AniMotion").setup({
@@ -102,3 +102,4 @@ After experimenting with Helix-style `w` and `b` motions, I noticed that what I 
 
 ## Notes
 - This plugin works in normal mode, so any key you press that isn't captured by this plugin will behave normally. For example, if you have `K` mapped to LSP hover, even when you have a word selected using `w` (in SEL mode), pressing `K` will show the hover normally.
+- Currently it does not support Macro Recording, so if a macro is being recorder, the movement motion will behave like it was before this plugin.

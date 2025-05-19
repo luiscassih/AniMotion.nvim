@@ -84,6 +84,10 @@ M.setup = function(config)
 
   for target, k in ipairs(word) do
     vim.keymap.set({ 'n' }, k, function()
+      if vim.fn.reg_recording() ~= "" then
+        vim.api.nvim_feedkeys(k, "n", true)
+        return
+      end
       if mode == "nvim" then
         start_pos = { vim.fn.line('.'), vim.fn.col('.') }
         vim.cmd("normal! " .. (vim.v.count > 0 and (vim.v.count .. k) or k))
